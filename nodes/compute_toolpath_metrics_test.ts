@@ -56,6 +56,27 @@ describe('ComputeToolpathMetrics', () => {
     expect(result.getMoveCount()).toBe(2);
   });
 
+  it('interpolates a clockwise semicircle to half the circumference, with a bbox extreme at its swept midpoint but not its unswept side', () => {
+    // G2 (clockwise) from (10,0) to (-10,0) around center (0,0), radius 10:
+    // sweeps through (0,-10) (270 degrees) but never (0,10) (90 degrees).
+    const input = new ComputeToolpathMetricsInput();
+    input.setContent('G21\nG90\nG1 X10 Y0 F600\nG2 X-10 Y0 I-10 J0\n');
+    const result = computeToolpathMetrics(testContext, input);
+
+    // Independent oracle: half a circle's circumference = PI * r = PI * 10.
+    const halfCircumference = Math.PI * 10;
+    expect(result.getCutDistance()).toBeCloseTo(10 + halfCircumference, 6);
+
+    const bbox = result.getBoundingBox()!;
+    expect(bbox.getMin()!.getX()).toBeCloseTo(-10, 6);
+    expect(bbox.getMax()!.getX()).toBeCloseTo(10, 6);
+    // Swept side (270 degrees, y=-10) is captured...
+    expect(bbox.getMin()!.getY()).toBeCloseTo(-10, 6);
+    // ...but the UNswept side (90 degrees, y=+10) must not leak in from the
+    // full circle's cardinal points.
+    expect(bbox.getMax()!.getY()).toBeCloseTo(0, 6);
+  });
+
   it('buckets G0 as rapid and G1 as cut distance separately', () => {
     const input = new ComputeToolpathMetricsInput();
     input.setContent('G0 X5 Y0\nG1 X15 Y0 F300\n');
@@ -64,6 +85,20 @@ describe('ComputeToolpathMetrics', () => {
     expect(result.getRapidDistance()).toBeCloseTo(5, 9);
     expect(result.getCutDistance()).toBeCloseTo(10, 9);
     expect(result.getTotalDistance()).toBeCloseTo(15, 9);
+  });
+
+  it('normalizes G20 (inch) feedrates to mm/min before estimating time — regression for a bug where F was left in inches, giving a 25.4x-wrong estimate', () => {
+    // Independent oracle: 1 inch traveled at 60 inches/min takes 1 second,
+    // regardless of what unit the distance/feedrate are expressed in — an
+    // invariant that catches a unit-mismatch bug even without hand-tracking
+    // the internal mm conversion.
+    const input = new ComputeToolpathMetricsInput();
+    input.setContent('G20\nG1 X1 Y0 F60\n');
+    const result = computeToolpathMetrics(testContext, input);
+
+    expect(result.getCutDistance()).toBeCloseTo(25.4, 9); // 1 inch, normalized to mm
+    expect(result.getFeedRatesUsedList()).toEqual([1524]); // 60 in/min -> 1524 mm/min
+    expect(result.getEstimatedTimeSeconds()).toBeCloseTo(1, 9);
   });
 
   it('tracks distinct spindle speeds and tool numbers independently of feedrate', () => {

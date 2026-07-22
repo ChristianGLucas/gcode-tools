@@ -84,7 +84,8 @@ export interface ToolpathResolution {
   estimatedTimeMinutes: number;
 }
 
-const DEFAULT_RAPID_FEEDRATE = 3000; // units/min — typical desktop CNC/3D-printer rapid rate
+const DEFAULT_RAPID_FEEDRATE = 3000; // mm/min — typical desktop CNC/3D-printer rapid rate
+const MM_PER_INCH = 25.4; // matches gcode-toolpath's own internal in2mm() conversion factor
 
 // Resolve raw G-code text into a full toolpath: every rapid/feed move and
 // arc, in order, with the geometric bounding box, per-motion-type
@@ -120,7 +121,8 @@ export function resolveToolpath(content: string, rapidFeedrate: number): Toolpat
   };
 
   const effectiveRapidFeedrate = rapidFeedrate > 0 ? rapidFeedrate : DEFAULT_RAPID_FEEDRATE;
-  let currentFeedrate = 0; // 0 = "not yet set by the file"
+  let currentFeedrate = 0; // always mm/min once set — 0 = "not yet set by the file"
+  let unitsAreInches = false; // tracks G20/G21, independent of gcode-toolpath's own modal (not exposed per-line)
   let estimatedTimeMinutes = 0;
 
   const toolpath = new Toolpath({
@@ -149,13 +151,28 @@ export function resolveToolpath(content: string, rapidFeedrate: number): Toolpat
       continue;
     }
     const parsed = gcodeParser.parseLine(trimmed, { lineMode: 'stripped' });
+
+    // Resolve this line's units FIRST (a separate pass), so a same-line
+    // "G20 F60" converts F using the units that word itself just set,
+    // regardless of word order within the line.
+    for (const [letter, value] of parsed.words) {
+      if (letter === 'G' && typeof value === 'number') {
+        if (value === 20) unitsAreInches = true;
+        else if (value === 21) unitsAreInches = false;
+      }
+    }
+
     for (const [letter, value] of parsed.words) {
       if (typeof value !== 'number' || Number.isNaN(value)) {
         continue;
       }
       if (letter === 'F') {
-        currentFeedrate = value;
-        feedRatesUsed.add(value);
+        // Positions are always resolved in mm (gcode-toolpath normalizes
+        // G20 internally via *25.4), so F must be normalized the same way
+        // for distance/feedrate = time to come out in real seconds.
+        const feedrateMm = unitsAreInches ? value * MM_PER_INCH : value;
+        currentFeedrate = feedrateMm;
+        feedRatesUsed.add(feedrateMm);
       } else if (letter === 'S') {
         spindleSpeedsUsed.add(value);
       } else if (letter === 'T') {

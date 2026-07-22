@@ -22,7 +22,7 @@ package christiangeorgelucas.gcode_tools;
 // The canonical input for every node that reads raw G-code: the full text
 // content, verbatim, as the caller has it on disk (any line endings; both
 // ";" and "(...)" comment styles; N-line-numbers and "*" checksums are all
-// part of the text itself). Capped at 3 MiB / 300,000 lines — over either
+// part of the text itself). Capped at 3 MiB / 200,000 lines — over either
 // limit every node returns a structured error instead of processing it.
 message GcodeInput {
   string content = 1;
@@ -95,7 +95,8 @@ message ComputeToolpathMetricsInput {
 }
 
 // Axis-aligned bounding box of every point the toolpath visits (rapids AND
-// feed moves both count), in the file's own units.
+// feed moves both count), always in millimeters — gcode-toolpath normalizes
+// G20 (inch) input internally, regardless of the file's own declared units.
 message BoundingBox {
   Point3 min = 1;
   Point3 max = 2;
@@ -113,9 +114,9 @@ message ToolpathMetrics {
   double cut_distance = 3;            // total G1/G2/G3 distance
   double total_distance = 4;          // rapid_distance + cut_distance
   double estimated_time_seconds = 5;
-  string units = 6;                   // "mm" | "in" — from G20/G21, default "mm"
-  repeated double feed_rates_used = 7;      // distinct F values encountered, ascending
-  repeated double spindle_speeds_used = 8;  // distinct S values encountered, ascending
+  string units = 6;                   // always "mm" — see BoundingBox above
+  repeated double feed_rates_used = 7;      // distinct F values, normalized to mm/min, ascending
+  repeated double spindle_speeds_used = 8;  // distinct S values encountered (file's own units), ascending
   repeated int32 tools_used = 9;            // distinct T values encountered, ascending
   int32 move_count = 10;              // number of resolved line/arc segments (rapid + cut)
   string error = 11;

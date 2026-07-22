@@ -7,9 +7,10 @@ description: >-
   into a full toolpath (line segments + interpolated arcs) to compute
   bounding box / travel & cut distance / estimated run-time / feed & speed
   usage, inventory the distinct G/M codes used, and re-emit normalized
-  G-code — wrapping the MIT-licensed cncjs gcode-parser / gcode-interpreter
-  / gcode-toolpath library family, the parsing engine behind the cncjs CNC
-  controller application. Offline and deterministic: no machine
+  G-code — wrapping the MIT-licensed cncjs gcode-parser and gcode-toolpath
+  libraries (gcode-toolpath itself built on gcode-interpreter), the parsing
+  engine behind the cncjs CNC controller application. Offline and
+  deterministic: no machine
   communication, no file-system access, no network calls. Every node caps
   input at 3 MiB / 200,000 lines and returns a structured error rather than
   hanging or crashing on oversized or malformed input.
@@ -38,6 +39,9 @@ nodes:
         on; use ValidateGcode first if you need to know whether a file is
         well-formed. error is set only when content itself is rejected
         (over the 3 MiB / 200,000-line cap) — lines is empty in that case.
+        Standard G-code has no scientific-notation syntax, and the "e" in
+        e.g. "X-10.5e2" is instead read as a new E (extruder) word — write
+        plain decimal literals.
     - name: ValidateGcode
       input: GcodeInput
       output: ValidationResult
