@@ -1,0 +1,157 @@
+// This file defines the data contracts (messages) for your Axiom package.
+// Every node's --input and --output refers to a message defined here.
+//
+// Run `axiom create message <Name>` to scaffold a new message below.
+// Run `axiom generate` to compile these definitions into language bindings in gen/.
+//
+// DOCUMENTATION
+//   Comments written directly above a message or field declaration are extracted
+//   automatically at publish time and shown in the Axiom registry as documentation.
+//   Write your descriptions there — no separate doc files needed.
+//
+//   Leading comment  (no blank line before the declaration) → registry description ✓
+//   Detached comment (blank line before the declaration)    → ignored by registry  ✗
+//
+// This file is yours to edit. Axiom only appends new message blocks — it never
+// overwrites or removes content you have written.
+
+syntax = "proto3";
+
+package christiangeorgelucas.gcode_tools;
+
+// The canonical input for every node that reads raw G-code: the full text
+// content, verbatim, as the caller has it on disk (any line endings; both
+// ";" and "(...)" comment styles; N-line-numbers and "*" checksums are all
+// part of the text itself). Capped at 3 MiB / 300,000 lines — over either
+// limit every node returns a structured error instead of processing it.
+message GcodeInput {
+  string content = 1;
+}
+
+// A 3D Cartesian point, in the G-code's own declared units (mm unless a G20
+// "use inches" word switches the file to inches — see ToolpathMetrics.units).
+message Point3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// One address/value pair from a line, e.g. letter "G" value 1 for "G1", or
+// letter "X" value 12.5 for "X12.5". value is 0 for a bare letter (rare,
+// e.g. a lone "M" is invalid G-code and is instead reported as a ValidationIssue).
+message GcodeWord {
+  string letter = 1;
+  double value = 2;
+}
+
+// One source line, fully tokenized. line_number is 1-based. A blank or
+// comment-only line has an empty words list.
+message GcodeLine {
+  int32 line_number = 1;
+  repeated GcodeWord words = 2;
+  string comment = 3;
+  string raw = 4;
+}
+
+// Output of ParseGcode: every line tokenized into its address words, in
+// source order. error is set only when the input itself is rejected (over
+// the size/line cap) — lines is empty in that case. A line whose text
+// cannot be tokenized at all (stray character with no recognized letter
+// prefix) is still included with an empty words list; use ValidateGcode to
+// surface that as an issue.
+message ParsedGcode {
+  repeated GcodeLine lines = 1;
+  int32 line_count = 2;
+  string error = 3;
+}
+
+// One syntax or semantic problem found while validating a G-code file.
+// Never fatal on its own for "warning" severity; "error" severity means the
+// line could not be interpreted as valid G-code.
+message ValidationIssue {
+  int32 line = 1;
+  string severity = 2; // "error" | "warning"
+  string message = 3;
+}
+
+// Output of ValidateGcode. valid is true only when issues contains no
+// "error"-severity entry (warnings alone do not make a file invalid).
+message ValidationResult {
+  bool valid = 1;
+  repeated ValidationIssue issues = 2;
+  int32 line_count = 3;
+  string error = 4;
+}
+
+// Input for ComputeToolpathMetrics. rapid_feedrate is the assumed traverse
+// rate (in the file's own units per minute) used ONLY to estimate run-time
+// for G0 rapid moves, which real G-code never specifies a feedrate for;
+// leave 0 to use the default of 3000 units/min (a typical desktop-CNC/3D-
+// printer rapid rate). Feed moves (G1/G2/G3) always use the file's own F
+// words for the time estimate, never this default.
+message ComputeToolpathMetricsInput {
+  string content = 1;
+  double rapid_feedrate = 2;
+}
+
+// Axis-aligned bounding box of every point the toolpath visits (rapids AND
+// feed moves both count), in the file's own units.
+message BoundingBox {
+  Point3 min = 1;
+  Point3 max = 2;
+  Point3 extents = 3;
+}
+
+// Output of ComputeToolpathMetrics: the geometric and temporal summary of a
+// whole toolpath, resolved from the raw text by tracking modal state
+// (G90/G91 absolute/relative, G20/G21 units, G17/G18/G19 plane) and
+// interpolating G2/G3 arcs into their true curved length — never just the
+// straight chord between endpoints.
+message ToolpathMetrics {
+  BoundingBox bounding_box = 1;
+  double rapid_distance = 2;          // total G0 travel distance
+  double cut_distance = 3;            // total G1/G2/G3 distance
+  double total_distance = 4;          // rapid_distance + cut_distance
+  double estimated_time_seconds = 5;
+  string units = 6;                   // "mm" | "in" — from G20/G21, default "mm"
+  repeated double feed_rates_used = 7;      // distinct F values encountered, ascending
+  repeated double spindle_speeds_used = 8;  // distinct S values encountered, ascending
+  repeated int32 tools_used = 9;            // distinct T values encountered, ascending
+  int32 move_count = 10;              // number of resolved line/arc segments (rapid + cut)
+  string error = 11;
+}
+
+// One distinct G/M command found in the file, with every line it occurs on.
+message CommandCount {
+  string code = 1;      // e.g. "G1", "M3", normalized (no leading zeros, "G01" -> "G1")
+  int32 count = 2;
+  repeated int32 lines = 3; // capped at 50 entries; use count for the true total
+}
+
+// Output of ListCommands: an inventory of every distinct G/M code used.
+message CommandInventory {
+  repeated CommandCount commands = 1;
+  int32 total_lines = 2;
+  string error = 3;
+}
+
+// Input for ReemitGcode. line_mode controls how much of the original
+// formatting survives:
+//   "original" — byte-identical round-trip (comments and whitespace kept).
+//   "stripped" — comments removed, leading/trailing whitespace trimmed,
+//                inner word spacing kept (the default).
+//   "compact"  — comments AND all whitespace removed ("G1X0Y0" style).
+// An unrecognized line_mode is treated as "stripped".
+message ReemitGcodeInput {
+  string content = 1;
+  string line_mode = 2;
+}
+
+// Output of ReemitGcode: the re-serialized text. Re-parsing this output
+// with ParseGcode always yields the same words as parsing the original
+// content did (comments/whitespace aside) — this is a structural
+// normalization, never a semantic change.
+message ReemitGcodeOutput {
+  string content = 1;
+  string error = 2;
+}

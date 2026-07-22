@@ -1,0 +1,93 @@
+name: christiangeorgelucas/gcode-tools
+version: 0.1.0
+language: typescript
+description: >-
+  Composable Axiom G-code (CNC/3D-printing toolpath) nodes: tokenize raw
+  G-code text into structured commands, validate syntax, resolve motion
+  into a full toolpath (line segments + interpolated arcs) to compute
+  bounding box / travel & cut distance / estimated run-time / feed & speed
+  usage, inventory the distinct G/M codes used, and re-emit normalized
+  G-code — wrapping the MIT-licensed cncjs gcode-parser / gcode-interpreter
+  / gcode-toolpath library family, the parsing engine behind the cncjs CNC
+  controller application. Offline and deterministic: no machine
+  communication, no file-system access, no network calls. Every node caps
+  input at 3 MiB / 200,000 lines and returns a structured error rather than
+  hanging or crashing on oversized or malformed input.
+license: MIT
+author: Christian George Lucas
+tags:
+  - gcode
+  - cnc
+  - 3d-printing
+  - toolpath
+  - manufacturing
+  - rs274
+  - grbl
+  - cncjs
+  - machining
+nodes:
+    - name: ParseGcode
+      input: GcodeInput
+      output: ParsedGcode
+      description: >-
+        Tokenize raw G-code text into its structured lines: every source
+        line (including blank ones), 1-based, with its address words split
+        into (letter, numeric value) pairs (e.g. "G1 X10.5 F500" -> G=1,
+        X=10.5, F=500), any trailing comment ("; ..." or "(...)"), and the
+        raw source text. The general-purpose parse the other nodes build
+        on; use ValidateGcode first if you need to know whether a file is
+        well-formed. error is set only when content itself is rejected
+        (over the 3 MiB / 200,000-line cap) — lines is empty in that case.
+    - name: ValidateGcode
+      input: GcodeInput
+      output: ValidationResult
+      description: >-
+        Validate a G-code file's SYNTAX: every line's address words
+        tokenize cleanly (no stray unrecognized characters), every word's
+        numeric argument actually parses as a number, and any "*nnn"
+        checksum matches its computed value. Checks tokenization only — NOT
+        whether a G/M code number is a real, supported command (an unusual
+        vendor-specific code like "G28.1" is not flagged). issues with
+        severity "error" make valid=false; "warning" entries (currently: an
+        N line-number that goes backwards) do not.
+    - name: ComputeToolpathMetrics
+      input: ComputeToolpathMetricsInput
+      output: ToolpathMetrics
+      description: >-
+        Resolve a G-code file's full toolpath and summarize it
+        geometrically and temporally: the axis-aligned bounding box of
+        every point visited (rapid AND feed moves), total rapid-travel
+        distance, total cut distance, an estimated run-time, and the
+        distinct feedrates/spindle-speeds/tools used. Positions are tracked
+        through G90/G91 (absolute/relative) and G20/G21 (inch/mm —
+        internally normalized to millimeters, so bounding_box and every
+        distance here are always in mm regardless of the file's own
+        units), and G2/G3 arcs are interpolated to their true curved length
+        (including a helical Z rise), never just the straight chord between
+        endpoints. rapid_feedrate lets you supply your machine's real rapid
+        traverse rate (units/min) for the time estimate; 0 uses a 3000
+        mm/min default. A cut move traversed before any F word appears in
+        the file contributes 0 to the time estimate rather than guessing —
+        the estimate is an honest lower bound, not a promise.
+    - name: ListCommands
+      input: GcodeInput
+      output: CommandInventory
+      description: >-
+        Inventory every distinct G/M command used in a G-code file: its
+        normalized code (e.g. "G01" and "G1" both count as "G1"), how many
+        times it occurs, and which lines it occurs on (capped at 50 line
+        references per command — use count for the true total). Commands
+        are counted per occurrence of a G or M address word, not per line
+        (a line with "G1 M8" contributes one count to both G1 and M8).
+    - name: ReemitGcode
+      input: ReemitGcodeInput
+      output: ReemitGcodeOutput
+      description: >-
+        Re-serialize G-code text through the tokenizer and back,
+        normalizing line endings to "\n". line_mode "original"
+        (byte-identical content, endings aside) is a true round-trip:
+        re-parsing the output with ParseGcode always yields the same words.
+        "stripped" (the default) drops comments and blank/comment-only
+        lines while keeping each line's inner word spacing; "compact"
+        additionally removes all whitespace. An unrecognized line_mode
+        falls back to "stripped".
