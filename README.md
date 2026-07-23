@@ -1,6 +1,6 @@
 # gcode-tools
 
-Composable [Axiom](https://axiom.dev) nodes for G-code — the CNC/3D-printing
+Composable [Axiom](https://axiomide.com) nodes for G-code — the CNC/3D-printing
 toolpath instruction format (RS-274/NIST, as spoken by GRBL, Marlin,
 Smoothieware, LinuxCNC, and friends).
 
