@@ -1,6 +1,6 @@
 import { ComputeToolpathMetricsInput, ToolpathMetrics, BoundingBox, Point3 } from '../gen/messages_pb';
 import { AxiomContext } from '../gen/axiomContext';
-import { checkInputBounds, resolveToolpath } from './gcode_lib';
+import { resolveToolpath } from './gcode_lib';
 
 /**
  * Resolve a G-code file's full toolpath and summarize it geometrically and
@@ -23,12 +23,6 @@ import { checkInputBounds, resolveToolpath } from './gcode_lib';
 export function computeToolpathMetrics(ax: AxiomContext, input: ComputeToolpathMetricsInput): ToolpathMetrics {
   const out = new ToolpathMetrics();
   const content = input.getContent();
-
-  const boundsError = checkInputBounds(content);
-  if (boundsError !== null) {
-    out.setError(boundsError);
-    return out;
-  }
 
   const resolution = resolveToolpath(content, input.getRapidFeedrate());
 

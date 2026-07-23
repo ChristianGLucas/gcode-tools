@@ -10,7 +10,6 @@ describe('ReemitGcode', () => {
     input.setContent(COMMENTED_GCODE);
     input.setLineMode('original');
     const result = reemitGcode(testContext, input);
-    expect(result.getError()).toBe('');
     expect(result.getContent()).toBe(COMMENTED_GCODE);
   });
 

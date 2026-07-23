@@ -9,7 +9,6 @@ describe('ListCommands', () => {
     input.setContent(COMMAND_MIX_GCODE);
     const result = listCommands(testContext, input);
 
-    expect(result.getError()).toBe('');
     expect(result.getTotalLines()).toBe(8); // 7 content lines + trailing blank
 
     const byCode = new Map(result.getCommandsList().map((c) => [c.getCode(), c]));

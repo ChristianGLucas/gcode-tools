@@ -22,8 +22,7 @@ package christiangeorgelucas.gcode_tools;
 // The canonical input for every node that reads raw G-code: the full text
 // content, verbatim, as the caller has it on disk (any line endings; both
 // ";" and "(...)" comment styles; N-line-numbers and "*" checksums are all
-// part of the text itself). Capped at 3 MiB / 200,000 lines — over either
-// limit every node returns a structured error instead of processing it.
+// part of the text itself).
 message GcodeInput {
   string content = 1;
 }
@@ -54,15 +53,12 @@ message GcodeLine {
 }
 
 // Output of ParseGcode: every line tokenized into its address words, in
-// source order. error is set only when the input itself is rejected (over
-// the size/line cap) — lines is empty in that case. A line whose text
-// cannot be tokenized at all (stray character with no recognized letter
-// prefix) is still included with an empty words list; use ValidateGcode to
-// surface that as an issue.
+// source order. A line whose text cannot be tokenized at all (stray
+// character with no recognized letter prefix) is still included with an
+// empty words list; use ValidateGcode to surface that as an issue.
 message ParsedGcode {
   repeated GcodeLine lines = 1;
   int32 line_count = 2;
-  string error = 3;
 }
 
 // One syntax or semantic problem found while validating a G-code file.
@@ -80,7 +76,6 @@ message ValidationResult {
   bool valid = 1;
   repeated ValidationIssue issues = 2;
   int32 line_count = 3;
-  string error = 4;
 }
 
 // Input for ComputeToolpathMetrics. rapid_feedrate is the assumed traverse
@@ -119,21 +114,19 @@ message ToolpathMetrics {
   repeated double spindle_speeds_used = 8;  // distinct S values encountered (file's own units), ascending
   repeated int32 tools_used = 9;            // distinct T values encountered, ascending
   int32 move_count = 10;              // number of resolved line/arc segments (rapid + cut)
-  string error = 11;
 }
 
 // One distinct G/M command found in the file, with every line it occurs on.
 message CommandCount {
   string code = 1;      // e.g. "G1", "M3", normalized (no leading zeros, "G01" -> "G1")
   int32 count = 2;
-  repeated int32 lines = 3; // capped at 50 entries; use count for the true total
+  repeated int32 lines = 3;
 }
 
 // Output of ListCommands: an inventory of every distinct G/M code used.
 message CommandInventory {
   repeated CommandCount commands = 1;
   int32 total_lines = 2;
-  string error = 3;
 }
 
 // Input for ReemitGcode. line_mode controls how much of the original
@@ -154,5 +147,4 @@ message ReemitGcodeInput {
 // normalization, never a semantic change.
 message ReemitGcodeOutput {
   string content = 1;
-  string error = 2;
 }

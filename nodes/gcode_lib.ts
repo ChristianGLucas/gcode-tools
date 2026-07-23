@@ -1,42 +1,14 @@
-// Shared helpers for the gcode-tools nodes: input bounds, line splitting,
-// code normalization, and the toolpath-metrics geometry built on top of the
+// Shared helpers for the gcode-tools nodes: line splitting, code
+// normalization, and the toolpath-metrics geometry built on top of the
 // cncjs gcode-parser / gcode-interpreter / gcode-toolpath library family.
+//
+// No input-size bounds are enforced here: payload size, memory, and DoS
+// containment are the Axiom platform's job (ingress + gRPC message caps,
+// sandboxed per-request memory/CPU/time limits), not this package's. These
+// nodes are pure input -> output transforms and validate G-code MEANING,
+// never size.
 import * as gcodeParser from 'gcode-parser';
 import Toolpath, { ToolpathModal, Vector3 } from 'gcode-toolpath';
-
-// Input bounds (Phase: input -> cost). Chosen to sit under the Axiom
-// platform's own ~4 MiB gRPC message cap (so we reject with a clear
-// structured error rather than the transport failing first) and to bound
-// per-request CPU: every line is tokenized at least once, and toolpath
-// resolution invokes the interpreter once per line.
-export const MAX_CONTENT_BYTES = 3 * 1024 * 1024; // 3 MiB
-export const MAX_LINES = 200_000;
-
-export function checkInputBounds(content: string): string | null {
-  const byteLength = Buffer.byteLength(content, 'utf8');
-  if (byteLength > MAX_CONTENT_BYTES) {
-    return `content exceeds the ${MAX_CONTENT_BYTES}-byte limit (got ${byteLength} bytes)`;
-  }
-  const lineCount = countLines(content);
-  if (lineCount > MAX_LINES) {
-    return `content exceeds the ${MAX_LINES}-line limit (got ${lineCount} lines)`;
-  }
-  return null;
-}
-
-function countLines(content: string): number {
-  if (content.length === 0) {
-    return 0;
-  }
-  // Count line separators + 1, without allocating the split array twice.
-  let count = 1;
-  for (let i = 0; i < content.length; i++) {
-    if (content[i] === '\n') {
-      count++;
-    }
-  }
-  return count;
-}
 
 // Split on \r\n, \r, or \n, preserving one entry per source line (including
 // blank lines) so callers can report accurate 1-based line numbers.

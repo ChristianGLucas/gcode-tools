@@ -2,7 +2,6 @@ import { ComputeToolpathMetricsInput } from '../gen/messages_pb';
 import { computeToolpathMetrics } from './compute_toolpath_metrics';
 import { testContext } from './test_context';
 import { SQUARE_GCODE, CIRCLE_GCODE } from './test_fixtures';
-import { MAX_CONTENT_BYTES } from './gcode_lib';
 
 describe('ComputeToolpathMetrics', () => {
   it('computes exact distances/bbox/time for a hand-verified 10mm square cut at F600', () => {
@@ -10,7 +9,6 @@ describe('ComputeToolpathMetrics', () => {
     input.setContent(SQUARE_GCODE);
     const result = computeToolpathMetrics(testContext, input);
 
-    expect(result.getError()).toBe('');
     // Independent oracle: 4 sides of 10mm each = 40mm exactly, hand-added.
     expect(result.getCutDistance()).toBeCloseTo(40, 9);
     expect(result.getRapidDistance()).toBe(0);
@@ -36,7 +34,6 @@ describe('ComputeToolpathMetrics', () => {
     input.setContent(CIRCLE_GCODE);
     const result = computeToolpathMetrics(testContext, input);
 
-    expect(result.getError()).toBe('');
     // Independent oracle: circumference = 2 * PI * r, r=10 -> 62.83185307179586,
     // computed from the standard formula, not from the wrapped library.
     const circumference = 2 * Math.PI * 10;
@@ -109,12 +106,5 @@ describe('ComputeToolpathMetrics', () => {
     expect(result.getSpindleSpeedsUsedList()).toEqual([1000, 2000]);
     expect(result.getToolsUsedList()).toEqual([2]);
     expect(result.getFeedRatesUsedList()).toEqual([500]);
-  });
-
-  it('rejects content over the size cap with a structured error instead of hanging', () => {
-    const input = new ComputeToolpathMetricsInput();
-    input.setContent('G1 X1\n'.repeat(Math.ceil(MAX_CONTENT_BYTES / 6) + 1)); // just over the 3 MiB cap
-    const result = computeToolpathMetrics(testContext, input);
-    expect(result.getError()).toContain('exceeds');
   });
 });

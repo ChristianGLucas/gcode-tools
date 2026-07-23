@@ -8,7 +8,6 @@ describe('ValidateGcode', () => {
     const input = new GcodeInput();
     input.setContent(SQUARE_GCODE);
     const result = validateGcode(testContext, input);
-    expect(result.getError()).toBe('');
     expect(result.getValid()).toBe(true);
     expect(result.getIssuesList()).toHaveLength(0);
   });

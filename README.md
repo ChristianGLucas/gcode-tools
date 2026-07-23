@@ -30,9 +30,10 @@ rather than reimplementing G-code tokenization or modal-state tracking.
   normalizing line endings; a true round-trip through ParseGcode.
 
 Every node is a pure, deterministic transform on G-code TEXT — no machine
-communication, no file-system access, no network calls. Input is capped at
-3 MiB / 200,000 lines; over either limit, every node returns a structured
-error instead of hanging or crashing.
+communication, no file-system access, no network calls. Payload size,
+memory, and DoS containment are the Axiom platform's job, not this
+package's — these nodes place no size/line/entry caps of their own and
+validate G-code meaning, not size.
 
 ## License
 

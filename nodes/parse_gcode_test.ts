@@ -2,7 +2,6 @@ import { GcodeInput } from '../gen/messages_pb';
 import { parseGcode } from './parse_gcode';
 import { testContext } from './test_context';
 import { SQUARE_GCODE } from './test_fixtures';
-import { MAX_CONTENT_BYTES } from './gcode_lib';
 
 describe('ParseGcode', () => {
   it('tokenizes a realistic G-code file into the hand-verified line/word structure', () => {
@@ -10,7 +9,6 @@ describe('ParseGcode', () => {
     input.setContent(SQUARE_GCODE);
     const result = parseGcode(testContext, input);
 
-    expect(result.getError()).toBe('');
     // 8 content lines + 1 trailing empty line from the fixture's final "\n".
     expect(result.getLineCount()).toBe(9);
     expect(result.getLinesList()).toHaveLength(9);
@@ -46,18 +44,9 @@ describe('ParseGcode', () => {
     const input = new GcodeInput();
     input.setContent('G1 X1\n\nG1 X2\n');
     const result = parseGcode(testContext, input);
-    expect(result.getError()).toBe('');
     // "G1 X1", "", "G1 X2", "" (trailing newline).
     expect(result.getLinesList()).toHaveLength(4);
     expect(result.getLinesList()[1].getWordsList()).toHaveLength(0);
     expect(result.getLinesList()[1].getRaw()).toBe('');
-  });
-
-  it('rejects content over the size cap with a structured error instead of crashing', () => {
-    const input = new GcodeInput();
-    input.setContent('G1 X1\n'.repeat(Math.ceil(MAX_CONTENT_BYTES / 6) + 1));
-    const result = parseGcode(testContext, input);
-    expect(result.getError()).toContain('exceeds');
-    expect(result.getLinesList()).toHaveLength(0);
   });
 });

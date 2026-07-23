@@ -1100,8 +1100,7 @@ proto.christiangeorgelucas.gcode_tools.ParsedGcode.toObject = function(includeIn
   var f, obj = {
 linesList: jspb.Message.toObjectList(msg.getLinesList(),
     proto.christiangeorgelucas.gcode_tools.GcodeLine.toObject, includeInstance),
-lineCount: jspb.Message.getFieldWithDefault(msg, 2, 0),
-error: jspb.Message.getFieldWithDefault(msg, 3, "")
+lineCount: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -1147,10 +1146,6 @@ proto.christiangeorgelucas.gcode_tools.ParsedGcode.deserializeBinaryFromReader =
       var value = /** @type {number} */ (reader.readInt32());
       msg.setLineCount(value);
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setError(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -1192,13 +1187,6 @@ proto.christiangeorgelucas.gcode_tools.ParsedGcode.serializeBinaryToWriter = fun
   if (f !== 0) {
     writer.writeInt32(
       2,
-      f
-    );
-  }
-  f = message.getError();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
       f
     );
   }
@@ -1258,24 +1246,6 @@ proto.christiangeorgelucas.gcode_tools.ParsedGcode.prototype.getLineCount = func
  */
 proto.christiangeorgelucas.gcode_tools.ParsedGcode.prototype.setLineCount = function(value) {
   return jspb.Message.setProto3IntField(this, 2, value);
-};
-
-
-/**
- * optional string error = 3;
- * @return {string}
- */
-proto.christiangeorgelucas.gcode_tools.ParsedGcode.prototype.getError = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.christiangeorgelucas.gcode_tools.ParsedGcode} returns this
- */
-proto.christiangeorgelucas.gcode_tools.ParsedGcode.prototype.setError = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1511,8 +1481,7 @@ proto.christiangeorgelucas.gcode_tools.ValidationResult.toObject = function(incl
 valid: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
 issuesList: jspb.Message.toObjectList(msg.getIssuesList(),
     proto.christiangeorgelucas.gcode_tools.ValidationIssue.toObject, includeInstance),
-lineCount: jspb.Message.getFieldWithDefault(msg, 3, 0),
-error: jspb.Message.getFieldWithDefault(msg, 4, "")
+lineCount: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -1562,10 +1531,6 @@ proto.christiangeorgelucas.gcode_tools.ValidationResult.deserializeBinaryFromRea
       var value = /** @type {number} */ (reader.readInt32());
       msg.setLineCount(value);
       break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setError(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -1614,13 +1579,6 @@ proto.christiangeorgelucas.gcode_tools.ValidationResult.serializeBinaryToWriter 
   if (f !== 0) {
     writer.writeInt32(
       3,
-      f
-    );
-  }
-  f = message.getError();
-  if (f.length > 0) {
-    writer.writeString(
-      4,
       f
     );
   }
@@ -1698,24 +1656,6 @@ proto.christiangeorgelucas.gcode_tools.ValidationResult.prototype.getLineCount =
  */
 proto.christiangeorgelucas.gcode_tools.ValidationResult.prototype.setLineCount = function(value) {
   return jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
- * optional string error = 4;
- * @return {string}
- */
-proto.christiangeorgelucas.gcode_tools.ValidationResult.prototype.getError = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.christiangeorgelucas.gcode_tools.ValidationResult} returns this
- */
-proto.christiangeorgelucas.gcode_tools.ValidationResult.prototype.setError = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -2180,8 +2120,7 @@ units: jspb.Message.getFieldWithDefault(msg, 6, ""),
 feedRatesUsedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 7)) == null ? undefined : f,
 spindleSpeedsUsedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 8)) == null ? undefined : f,
 toolsUsedList: (f = jspb.Message.getRepeatedField(msg, 9)) == null ? undefined : f,
-moveCount: jspb.Message.getFieldWithDefault(msg, 10, 0),
-error: jspb.Message.getFieldWithDefault(msg, 11, "")
+moveCount: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
@@ -2264,10 +2203,6 @@ proto.christiangeorgelucas.gcode_tools.ToolpathMetrics.deserializeBinaryFromRead
     case 10:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setMoveCount(value);
-      break;
-    case 11:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setError(value);
       break;
     default:
       reader.skipField();
@@ -2366,13 +2301,6 @@ proto.christiangeorgelucas.gcode_tools.ToolpathMetrics.serializeBinaryToWriter =
   if (f !== 0) {
     writer.writeInt32(
       10,
-      f
-    );
-  }
-  f = message.getError();
-  if (f.length > 0) {
-    writer.writeString(
-      11,
       f
     );
   }
@@ -2635,24 +2563,6 @@ proto.christiangeorgelucas.gcode_tools.ToolpathMetrics.prototype.setMoveCount = 
 };
 
 
-/**
- * optional string error = 11;
- * @return {string}
- */
-proto.christiangeorgelucas.gcode_tools.ToolpathMetrics.prototype.getError = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.christiangeorgelucas.gcode_tools.ToolpathMetrics} returns this
- */
-proto.christiangeorgelucas.gcode_tools.ToolpathMetrics.prototype.setError = function(value) {
-  return jspb.Message.setProto3StringField(this, 11, value);
-};
-
-
 
 /**
  * List of repeated fields within this message type.
@@ -2912,8 +2822,7 @@ proto.christiangeorgelucas.gcode_tools.CommandInventory.toObject = function(incl
   var f, obj = {
 commandsList: jspb.Message.toObjectList(msg.getCommandsList(),
     proto.christiangeorgelucas.gcode_tools.CommandCount.toObject, includeInstance),
-totalLines: jspb.Message.getFieldWithDefault(msg, 2, 0),
-error: jspb.Message.getFieldWithDefault(msg, 3, "")
+totalLines: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -2959,10 +2868,6 @@ proto.christiangeorgelucas.gcode_tools.CommandInventory.deserializeBinaryFromRea
       var value = /** @type {number} */ (reader.readInt32());
       msg.setTotalLines(value);
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setError(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -3004,13 +2909,6 @@ proto.christiangeorgelucas.gcode_tools.CommandInventory.serializeBinaryToWriter 
   if (f !== 0) {
     writer.writeInt32(
       2,
-      f
-    );
-  }
-  f = message.getError();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
       f
     );
   }
@@ -3070,24 +2968,6 @@ proto.christiangeorgelucas.gcode_tools.CommandInventory.prototype.getTotalLines 
  */
 proto.christiangeorgelucas.gcode_tools.CommandInventory.prototype.setTotalLines = function(value) {
   return jspb.Message.setProto3IntField(this, 2, value);
-};
-
-
-/**
- * optional string error = 3;
- * @return {string}
- */
-proto.christiangeorgelucas.gcode_tools.CommandInventory.prototype.getError = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.christiangeorgelucas.gcode_tools.CommandInventory} returns this
- */
-proto.christiangeorgelucas.gcode_tools.CommandInventory.prototype.setError = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -3283,8 +3163,7 @@ proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.prototype.toObject = fu
  */
 proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.toObject = function(includeInstance, msg) {
   var f, obj = {
-content: jspb.Message.getFieldWithDefault(msg, 1, ""),
-error: jspb.Message.getFieldWithDefault(msg, 2, "")
+content: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -3325,10 +3204,6 @@ proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.deserializeBinaryFromRe
       var value = /** @type {string} */ (reader.readString());
       msg.setContent(value);
       break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setError(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -3365,13 +3240,6 @@ proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.serializeBinaryToWriter
       f
     );
   }
-  f = message.getError();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
 };
 
 
@@ -3390,24 +3258,6 @@ proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.prototype.getContent = 
  */
 proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.prototype.setContent = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
-};
-
-
-/**
- * optional string error = 2;
- * @return {string}
- */
-proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.prototype.getError = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput} returns this
- */
-proto.christiangeorgelucas.gcode_tools.ReemitGcodeOutput.prototype.setError = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

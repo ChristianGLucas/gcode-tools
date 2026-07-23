@@ -1,7 +1,7 @@
 import { GcodeInput, ValidationResult, ValidationIssue } from '../gen/messages_pb';
 import { AxiomContext } from '../gen/axiomContext';
 import * as gcodeParser from 'gcode-parser';
-import { checkInputBounds, splitLines } from './gcode_lib';
+import { splitLines } from './gcode_lib';
 
 // Mirrors the word grammar gcode-parser itself recognizes (a letter
 // followed by one or more digits/sign/decimal characters, or a "*nnn"
@@ -25,13 +25,6 @@ const WORD_OR_CHECKSUM = /([a-zA-Z][0-9+\-.]+)|(\*[0-9]+)/g;
 export function validateGcode(ax: AxiomContext, input: GcodeInput): ValidationResult {
   const out = new ValidationResult();
   const content = input.getContent();
-
-  const boundsError = checkInputBounds(content);
-  if (boundsError !== null) {
-    out.setError(boundsError);
-    out.setValid(false);
-    return out;
-  }
 
   const issues: ValidationIssue[] = [];
   const addIssue = (line: number, severity: 'error' | 'warning', message: string) => {

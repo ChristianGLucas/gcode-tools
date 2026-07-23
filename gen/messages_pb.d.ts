@@ -118,9 +118,6 @@ export class ParsedGcode extends jspb.Message {
   getLineCount(): number;
   setLineCount(value: number): void;
 
-  getError(): string;
-  setError(value: string): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ParsedGcode.AsObject;
   static toObject(includeInstance: boolean, msg: ParsedGcode): ParsedGcode.AsObject;
@@ -135,7 +132,6 @@ export namespace ParsedGcode {
   export type AsObject = {
     linesList: Array<GcodeLine.AsObject>,
     lineCount: number,
-    error: string,
   }
 }
 
@@ -179,9 +175,6 @@ export class ValidationResult extends jspb.Message {
   getLineCount(): number;
   setLineCount(value: number): void;
 
-  getError(): string;
-  setError(value: string): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ValidationResult.AsObject;
   static toObject(includeInstance: boolean, msg: ValidationResult): ValidationResult.AsObject;
@@ -197,7 +190,6 @@ export namespace ValidationResult {
     valid: boolean,
     issuesList: Array<ValidationIssue.AsObject>,
     lineCount: number,
-    error: string,
   }
 }
 
@@ -298,9 +290,6 @@ export class ToolpathMetrics extends jspb.Message {
   getMoveCount(): number;
   setMoveCount(value: number): void;
 
-  getError(): string;
-  setError(value: string): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ToolpathMetrics.AsObject;
   static toObject(includeInstance: boolean, msg: ToolpathMetrics): ToolpathMetrics.AsObject;
@@ -323,7 +312,6 @@ export namespace ToolpathMetrics {
     spindleSpeedsUsedList: Array<number>,
     toolsUsedList: Array<number>,
     moveCount: number,
-    error: string,
   }
 }
 
@@ -366,9 +354,6 @@ export class CommandInventory extends jspb.Message {
   getTotalLines(): number;
   setTotalLines(value: number): void;
 
-  getError(): string;
-  setError(value: string): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CommandInventory.AsObject;
   static toObject(includeInstance: boolean, msg: CommandInventory): CommandInventory.AsObject;
@@ -383,7 +368,6 @@ export namespace CommandInventory {
   export type AsObject = {
     commandsList: Array<CommandCount.AsObject>,
     totalLines: number,
-    error: string,
   }
 }
 
@@ -415,9 +399,6 @@ export class ReemitGcodeOutput extends jspb.Message {
   getContent(): string;
   setContent(value: string): void;
 
-  getError(): string;
-  setError(value: string): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ReemitGcodeOutput.AsObject;
   static toObject(includeInstance: boolean, msg: ReemitGcodeOutput): ReemitGcodeOutput.AsObject;
@@ -431,7 +412,6 @@ export class ReemitGcodeOutput extends jspb.Message {
 export namespace ReemitGcodeOutput {
   export type AsObject = {
     content: string,
-    error: string,
   }
 }
 

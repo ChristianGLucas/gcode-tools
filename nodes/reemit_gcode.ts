@@ -1,7 +1,7 @@
 import { ReemitGcodeInput, ReemitGcodeOutput } from '../gen/messages_pb';
 import { AxiomContext } from '../gen/axiomContext';
 import * as gcodeParser from 'gcode-parser';
-import { checkInputBounds, splitLines } from './gcode_lib';
+import { splitLines } from './gcode_lib';
 
 const LINE_MODES = ['original', 'stripped', 'compact'] as const;
 type LineMode = (typeof LINE_MODES)[number];
@@ -20,12 +20,6 @@ type LineMode = (typeof LINE_MODES)[number];
 export function reemitGcode(ax: AxiomContext, input: ReemitGcodeInput): ReemitGcodeOutput {
   const out = new ReemitGcodeOutput();
   const content = input.getContent();
-
-  const boundsError = checkInputBounds(content);
-  if (boundsError !== null) {
-    out.setError(boundsError);
-    return out;
-  }
 
   const requested = input.getLineMode();
   const lineMode: LineMode = (LINE_MODES as readonly string[]).includes(requested) ? (requested as LineMode) : 'stripped';
